@@ -1,10 +1,10 @@
-def accountLogIn ():
-    accountNumber = input("Please enter your account number: ")
+import getpass
+import random
+import json
 
-def newAccount():
+def createNewAccount():
     fullName = input("Enter Your name in full, first name should come first, then last name, your surname should come last: ")
 
-    import getpass
     pin = getpass.getpass("Enter your pin")
     confirmPin = getpass.getpass("Enter the pin again")
 
@@ -13,27 +13,37 @@ def newAccount():
         return
     
     userAccount= ""
-    def accountType ():
-        accType = input("Enter the type of account you want, 1 for savings, 2 for current, 3 for student:")
-        if accType == 1:
-            userAccount= "Savings"
-        elif accType == 2:
-            userAccount = "Current"
-        elif accType == 3:
-            userAccount = "Student"
-        else:
-            print("Wrong input, Please retry")
-            accountType()
-    import random
-    accountNumber = random.randint(10^9, 10^10-1)
-    accounts = {
-
-    }
-    accounts[random.randint(10**9, 10**10-1)] = {
+    accType = int(input("Enter the type of account you want (1=savings, 2=current, 3=student): "))
+    if accType == 1:
+        userAccount= "Savings"
+    elif accType == 2:
+        userAccount = "Current"
+    elif accType == 3:
+        userAccount = "Student"
+    else:
+        print("Wrong input, Please retry")
+        return
+    
+    accountNumber = random.randint(10**9, 10**10-1)
+    newAccount= {
         "Fullname": fullName,
         "pin": pin,
-        "AccountType": userAccount,
+        "Account Type": userAccount,
         "Balance": 0,
-        "Locked": False
+        "Locked": False,
+        "Account Number": str(accountNumber)
     }
-    print(accounts)
+
+    try:
+        with open("data.json", "r") as dataFile:
+            accounts= json.load(dataFile)
+    except emptyFileError:
+        accounts= []
+    
+    accounts.append(newAccount)
+
+    with open("data.json", "w") as dataFile:
+        json.dump(accounts, dataFile)
+
+def accountLogIn():
+    

@@ -13,7 +13,7 @@ while sessionActive == True :
     if userInput == 1:
         functions.accountLogIn()
     elif userInput ==2:
-        functions.newAccount()
+        functions.createNewAccount()
     elif userInput == 3:
         print("Thank you for banking with us, See you next time.")
         sessionActive = False
