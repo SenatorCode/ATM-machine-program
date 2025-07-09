@@ -1,1 +1,26 @@
-[{"Fullname": "Fawaz Olamide Ibikunle", "pin": "6136", "Account Type": "Student", "Balance": 0, "Locked": false, "Account Number": "3596051660"}, {"Fullname": "WunderKinds ", "pin": "3305", "Account Type": "Savings", "Balance": 0, "Locked": false, "Account Number": "2818602507"}]
+[
+    {
+        "Fullname": "Fawaz Olamide Ibikunle",
+        "pin": "6136",
+        "Account Type": "Student",
+        "Balance": 0,
+        "Locked": false,
+        "Account Number": "3596051660"
+    },
+    {
+        "Fullname": "WunderKinds ",
+        "pin": "3305",
+        "Account Type": "Savings",
+        "Balance": 0,
+        "Locked": false,
+        "Account Number": "2818602507"
+    },
+    {
+        "Fullname": "Umar Abdul-Rahman",
+        "pin": "3232",
+        "Account Type": "Student",
+        "Balance": 0,
+        "Locked": false,
+        "Account Number": "6981453295"
+    }
+]
