@@ -9,7 +9,7 @@ while sessionActive == True :
     Press 3 to exit 
 """)
 
-    userInput = input("Please enter your choice: ")
+    userInput = int(input("Please enter your choice: "))
     if userInput == 1:
         functions.accountLogIn()
     elif userInput ==2:
