@@ -44,6 +44,6 @@ def createNewAccount():
 
     with open("data.json", "w") as dataFile:
         json.dump(accounts, dataFile)
+    print("Your account has been created successfully. Thank You for choosing us. Happy Banking!!!")
 
 def accountLogIn():
-    
