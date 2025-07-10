@@ -91,7 +91,7 @@ def withdraw(account):
                     return
                 else:
                     acc["Balance"] = acc["Balance"] - amount
-                    print(f"Withdrawal successful, your new balance is {acc['Balance']}")
+                    print(f"Withdrawal successful, your new balance is ₦{acc['Balance']:,}")
                     with open("data.json", "w") as dataFile:
                         json.dump(accounts, dataFile, indent=4)
                     return
@@ -101,7 +101,7 @@ def withdraw(account):
 
 
 # Transfer Function:
-def getRecipientAccount():
+def getRecipientAccount(length):
     while True:
         recipient = input("Enter recipient account number (10 digits): ")
 
@@ -110,9 +110,9 @@ def getRecipientAccount():
             print("Only numbers allowed. Try again.")
             continue  # Start again
 
-        # Check if it's exactly 11 digits
-        if len(recipient) != 11:
-            print("Account number must be 11 digits. Try again.")
+        # Check if it's exactly 10 digits
+        if len(recipient) != length:
+            print("Account number must be 10 digits. Try again.")
             continue  # Start again
 
         # If everything is correct
@@ -126,7 +126,7 @@ def transfer(account):
     accounts = readFile()
     for acc in accounts:
         if acc["Account Number"] == account["Account Number"]:
-            recipientAccount = getRecipientAccount()
+            recipientAccount = getRecipientAccount(10)
             try: 
                 amount = int(input(f"Enter the amount you want to transfer to {recipientAccount}"))
             except:
@@ -141,12 +141,86 @@ def transfer(account):
                 with open("data.json", "w") as dataFile:
                     json.dump(accounts, dataFile, indent=4)
                 print (f"Transfer to ({recipientAccount}) was successful")
-                print(f"Your New balance is {acc['Balance']}")
+                print(f"Your New balance is ₦{acc['Balance']:,}")
                 return
             else:
                 print("You have entered incorrect pins 3 times, Try again later.")
                 return
 
+
+# Deposit Function:
+def deposit(account):
+    accounts = readFile()
+    for acc in accounts:
+        if acc["Account Number"] == account["Account Number"]:
+            try:
+                depoAmount = int(input("Enter the amount you wish to deposit in figures: "))
+            except:
+                print("Invalid input!, enter the amount in figures only.")
+                return
+            if depoAmount <= 0:
+                print("You cannot deposit ₦0 or a negative  number")
+                return
+            elif depoAmount < 100:
+                print("The minimum deposit is ₦100.")
+                return
+            else:
+                confirm = input(f"Please confirm, you want to deposit ₦{depoAmount}:,  Y/N: ")
+                if confirm.upper() != "Y":
+                    print("Deposit cancelled")
+                    return
+                else: 
+                    checkInput = pinChecker(acc["pin"])
+                    if checkInput == True:
+                        acc["Balance"]= acc["Balance"] + depoAmount
+                        print(f"An amount of ₦{depoAmount} has been deposited successfully")
+                        print(f"Your new account balance is {acc['Balance']}")
+                        with open("data.json", "w") as dataFile:
+                            json.dump(accounts, dataFile, indent=4)
+                        return
+                    else:
+                        print("You have entered incorrect pins 3 times, Try again later.")
+                        return
+
+
+# Airtime Purchase Function:
+def airtimePurchase(account):
+    accounts = readFile()
+    for acc in accounts:
+        if acc["Account Number"] == account["Account Number"]:
+            recipientNumber = getRecipientAccount(11)
+            try: 
+                amount = int(input(f"Enter the amount of airtime you want to transfer to {recipientNumber}"))
+            except:
+                print("Invalid input, numbers only!!!")
+                return
+            networks = ["glo", "mtn", "airtel", "9mobile", "etisalat"]
+            userInput = input("Enter the network you want to buy (MTN, GLO, Airtel, Etisalat or 9mobile): ")
+
+            if userInput.lower() not in networks:
+                print("Invalid network!!!")
+                return
+            
+            checkInput = pinChecker(acc["pin"])
+            if checkInput == True:
+                if amount > acc["Balance"]:
+                    print("Insufficient Fund")
+                    return
+                elif amount <= 0:
+                    print("The amount cannot be negative or  ₦0")
+                    return
+                elif amount > 100000:
+                    print("Amount cannot be greater than  ₦100,000")
+                    return
+                acc["Balance"] = acc["Balance"] - amount
+                with open("data.json", "w") as dataFile:
+                    json.dump(accounts, dataFile, indent=4)
+                print (f"Airtime of  ₦{amount} to ({recipientNumber}) was successful")
+                print(f"Your New balance is ₦{acc['Balance']:,}")
+                return
+            else:
+                print("You have entered incorrect pins 3 times, Try again later.")
+                return
 
 # Account Manger Function:
 def accountManager(account):
