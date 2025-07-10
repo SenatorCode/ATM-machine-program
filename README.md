@@ -69,4 +69,4 @@ Save and show the last few actions (withdrawals, transfers, etc.)
 Make sure Python 3 is installed on your machine.
 
 ```bash
-python yourfilename.py
+python body.py
