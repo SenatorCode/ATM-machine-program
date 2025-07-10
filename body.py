@@ -9,12 +9,12 @@ while sessionActive == True :
     Press 3 to exit 
 """)
 
-    userInput = int(input("Please enter your choice: "))
-    if userInput == 1:
+    userInput = (input("Please enter your choice: "))
+    if userInput == "1":
         functions.accountLogIn()
-    elif userInput ==2:
+    elif userInput =="2":
         functions.createNewAccount()
-    elif userInput == 3:
+    elif userInput == "3":
         print("Thank you for banking with us, See you next time.")
         sessionActive = False
     else: 
