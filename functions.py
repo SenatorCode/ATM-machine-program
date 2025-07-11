@@ -23,24 +23,51 @@ def readFile():
     return(accounts)
 
 
+def getRecipientAccount(length, action):
+    while True:
+        recipient = input(f"Enter recipient {action} number, ({length}) digits: ")
+
+        # Check if it's only digits like "1234567890"
+        if not recipient.isdigit():
+            print("Only numbers allowed. Try again.")
+            continue  # Start again
+
+        # Check if it's exactly 10 digits
+        if len(recipient) != length:
+            print(f"{action} number must be {length} digits. Try again.")
+            continue  # Start again
+
+        # If everything is correct
+        confirm = input(f"Please confirm this {action} number {recipient}: Y/N")
+        if confirm.upper() == "Y":
+            return recipient
+        else:
+            continue
+
+
+
 # Create A New Account Function:
 def createNewAccount():
     fullName = input("Enter Your name in full, first name should come first, then last name, your surname should come last: ")
 
-    pin = getpass.getpass("Enter your pin")
-    confirmPin = getpass.getpass("Enter the pin again")
+    try:
+        pin = getpass.getpass("Enter your pin")
+        confirmPin = getpass.getpass("Enter the pin again")
+    except:
+        print("Digits only!!!")
+        return
 
     if pin != confirmPin:
         print("The password you entered does not match")
         return
     
     userAccount= ""
-    accType = int(input("Enter the type of account you want (1= savings, 2= current, 3= student): "))
-    if accType == 1:
+    accType = (input("Enter the type of account you want (1= savings, 2= current, 3= student): "))
+    if accType == "1":
         userAccount= "Savings"
-    elif accType == 2:
+    elif accType == "2":
         userAccount = "Current"
-    elif accType == 3:
+    elif accType == "3":
         userAccount = "Student"
     else:
         print("Wrong input, Please retry")
@@ -83,12 +110,20 @@ def withdraw(account):
     accounts = readFile()
     for acc in accounts:
         if acc["Account Number"] == account["Account Number"]:
-            amount = int(input("Enter the amount you want to withdraw"))
+            try:
+                amount = int(input("Enter the amount you want to withdraw: "))
+            except:
+                print("Invalid input!!!")
+                return
+            
             checkInput = pinChecker(acc["pin"])
             if checkInput == True:
                 if amount > acc["Balance"]:
                     print("Insufficient Balance")
                     return
+                elif amount <= 0:
+                        print("Invalid amount")
+                        return
                 else:
                     acc["Balance"] = acc["Balance"] - amount
                     print(f"Withdrawal successful, your new balance is ₦{acc['Balance']:,}")
@@ -101,34 +136,13 @@ def withdraw(account):
 
 
 # Transfer Function:
-def getRecipientAccount(length):
-    while True:
-        recipient = input("Enter recipient account number (10 digits): ")
-
-        # Check if it's only digits like "1234567890"
-        if not recipient.isdigit():
-            print("Only numbers allowed. Try again.")
-            continue  # Start again
-
-        # Check if it's exactly 10 digits
-        if len(recipient) != length:
-            print("Account number must be 10 digits. Try again.")
-            continue  # Start again
-
-        # If everything is correct
-        confirm = input(f"Please confirm this account number {recipient}: Y/N")
-        if confirm.upper() == "Y":
-            return recipient
-        else:
-            continue
-
 def transfer(account):
     accounts = readFile()
     for acc in accounts:
         if acc["Account Number"] == account["Account Number"]:
-            recipientAccount = getRecipientAccount(10)
+            recipientAccount = getRecipientAccount(10, "account")
             try: 
-                amount = int(input(f"Enter the amount you want to transfer to {recipientAccount}"))
+                amount = int(input(f"Enter the amount you want to transfer to {recipientAccount}: "))
             except:
                 print("Invalid input, numbers only!!!")
                 return
@@ -165,7 +179,7 @@ def deposit(account):
                 print("The minimum deposit is ₦100.")
                 return
             else:
-                confirm = input(f"Please confirm, you want to deposit ₦{depoAmount}:,  Y/N: ")
+                confirm = input(f"Please confirm, you want to deposit ₦{depoAmount}:, Y/N: ")
                 if confirm.upper() != "Y":
                     print("Deposit cancelled")
                     return
@@ -188,9 +202,9 @@ def airtimePurchase(account):
     accounts = readFile()
     for acc in accounts:
         if acc["Account Number"] == account["Account Number"]:
-            recipientNumber = getRecipientAccount(11)
+            recipientNumber = getRecipientAccount(11, "phone")
             try: 
-                amount = int(input(f"Enter the amount of airtime you want to transfer to {recipientNumber}"))
+                amount = int(input(f"Enter the amount of airtime you want to transfer to {recipientNumber}: "))
             except:
                 print("Invalid input, numbers only!!!")
                 return
@@ -222,6 +236,62 @@ def airtimePurchase(account):
                 print("You have entered incorrect pins 3 times, Try again later.")
                 return
 
+
+
+# Change Pin Function:
+def changePin(account):
+    accounts = readFile()
+    for acc in accounts:
+        if acc["Account Number"] == account["Account Number"]:
+            checkInput = pinChecker(acc["pin"])
+            if checkInput != True:
+                print("You have entered incorrect pins 3 times, your account has been locked, reach out to our nearest bank to reactivate your account.")
+                acc["Locked"] = True
+                with open("data.json", "w") as dataFile:
+                    json.dump(accounts, dataFile, indent=4)
+                return
+            else:
+                try:
+                    newPin = getpass.getpass("Enter your new pin: ")
+                    confirmPin = getpass.getpass("Re-enter the new pin for confirmation: ")
+                except:
+                    print("Digits only!!!")
+                if newPin != confirmPin:
+                    print("The pin you entered does not match, please try again later.")
+                    return
+                else: 
+                    acc["pin"] = newPin
+                    with open("data.json", "w") as dataFile:
+                        json.dump(accounts, dataFile, indent=4)
+                    print("You have successfully changed your pin")
+                    return
+
+
+# Delete Account Function:
+def deleteAccount(account):
+    accounts = readFile()
+    for acc in accounts:
+        if acc["Account Number"] == account["Account Number"]:
+            confirmAction = input("ARe you sure you want to delete your account, this action is not reversible, Y/N: ")
+            if confirmAction.lower() != "y":
+                print("Action deletion failed")
+                return
+            else:
+                checkInput = pinChecker(acc["pin"])
+                if checkInput != True:
+                    print("You have entered incorrect pins 3 times, your account has been locked, reach out to our nearest bank to reactivate your account.")
+                    acc["Locked"] = True
+                    with open("data.json", "w") as dataFile:
+                        json.dump(accounts, dataFile, indent=4)
+                    return
+                else: 
+                    accounts.remove(acc)
+                    with open("data.json", "w") as dataFile:
+                        json.dump(accounts, dataFile, indent=4)
+                    print("Your account has been permanently deleted. We're sorry to see you go.")
+                    return
+
+
 # Account Manger Function:
 def accountManager(account):
     active = True
@@ -252,7 +322,7 @@ def accountManager(account):
         elif userChoice == "6":
             changePin(account)
         elif userChoice == "7":
-            createNewAccount(account)
+            createNewAccount()
         elif userChoice == "8":
             deleteAccount(account)
         elif userChoice == "9":

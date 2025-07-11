@@ -2,7 +2,7 @@ import functions
 sessionActive = True 
 
 while sessionActive == True :
-    print ("Welcome to Alex & Co Bank.")
+    print ("Welcome to CLI Bank.")
     print("""
     Press 1 to log into your bank account
     Press 2 to create a new bank account
