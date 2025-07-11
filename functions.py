@@ -238,8 +238,8 @@ def changePin(account):
                     json.dump(accounts, dataFile, indent=4)
                 return
             try:
-                newPin = int(getpass.getpass("Enter new pin: "))
-                confirmPin = int(getpass.getpass("Confirm new pin: "))
+                newPin = (getpass.getpass("Enter new pin: "))
+                confirmPin = (getpass.getpass("Confirm new pin: "))
             except:
                 print("Digits only.")
                 return
