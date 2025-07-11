@@ -1,8 +1,11 @@
 import getpass
 import random
 import json
+import os
 
-# Check Pin Function
+def clearScreen():
+    os.system("cls" if os.name == "nt" else "clear")
+
 def pinChecker(original):
     attempt = 0 
     while attempt < 3:
@@ -10,357 +13,336 @@ def pinChecker(original):
         if userInput == original:
             return True
         else:
-            attempt +=1 
+            attempt += 1 
             attemptLeft = 3 - attempt
             print(f"You have {attemptLeft} more trials!!!")
     return False
 
-
-# Read data.json file Function
 def readFile():
-    with open("data.json", "r") as dataFile:
-        accounts = json.load(dataFile)
-    return(accounts)
-
+    try:
+        with open("data.json", "r") as dataFile:
+            accounts = json.load(dataFile)
+    except FileNotFoundError:
+        accounts = []
+    return accounts
 
 def getRecipientAccount(length, action):
     while True:
         recipient = input(f"Enter recipient {action} number, ({length}) digits: ")
-
-        # Check if it's only digits like "1234567890"
         if not recipient.isdigit():
             print("Only numbers allowed. Try again.")
-            continue  # Start again
-
-        # Check if it's exactly 10 digits
+            continue
         if len(recipient) != length:
             print(f"{action} number must be {length} digits. Try again.")
-            continue  # Start again
-
-        # If everything is correct
-        confirm = input(f"Please confirm this {action} number {recipient}: Y/N")
+            continue
+        confirm = input(f"Confirm {action} number {recipient}? (Y/N): ")
         if confirm.upper() == "Y":
             return recipient
-        else:
-            continue
 
-
-
-# Create A New Account Function:
 def createNewAccount():
-    fullName = input("Enter Your name in full, first name should come first, then last name, your surname should come last: ")
-
+    clearScreen()
+    fullName = input("Enter your full name (First Last Surname): ")
     try:
-        pin = getpass.getpass("Enter your pin")
-        confirmPin = getpass.getpass("Enter the pin again")
+        pin = getpass.getpass("Enter your pin: ")
+        confirmPin = getpass.getpass("Re-enter your pin: ")
     except:
-        print("Digits only!!!")
+        print("Digits only!")
+        input("Press Enter to continue...")
+        return
+    if pin != confirmPin:
+        print("The pin does not match.")
+        input("Press Enter to continue...")
         return
 
-    if pin != confirmPin:
-        print("The password you entered does not match")
-        return
-    
-    userAccount= ""
-    accType = (input("Enter the type of account you want (1= savings, 2= current, 3= student): "))
+    accType = input("Enter the type of account (1= Savings, 2= Current, 3= Student): ")
     if accType == "1":
-        userAccount= "Savings"
+        userAccount = "Savings"
     elif accType == "2":
         userAccount = "Current"
     elif accType == "3":
         userAccount = "Student"
     else:
-        print("Wrong input, Please retry")
+        print("Wrong input.")
+        input("Press Enter to continue...")
         return
-    
-    accountNumber = random.randint(10**9, 10**10-1)
-    newAccount= {
+
+    accountNumber = str(random.randint(10**9, 10**10 - 1))
+    newAccount = {
         "Fullname": fullName,
         "pin": pin,
         "Account Type": userAccount,
         "Balance": 0,
         "Locked": False,
-        "Account Number": str(accountNumber)
+        "Account Number": accountNumber
     }
-    try:
-        with open("data.json", "r") as dataFile:
-            accounts = json.load(dataFile)
-    except FileNotFoundError:
-        accounts= []
-    accounts.append(newAccount)
 
+    accounts = readFile()
+    accounts.append(newAccount)
     with open("data.json", "w") as dataFile:
         json.dump(accounts, dataFile, indent=4)
-    print("Your account has been created successfully. Thank You for choosing us. Happy Banking!!!")
+    print("Account created successfully.")
     print(f"Your account number is {accountNumber}")
+    input("Press Enter to continue...")
 
-
-# Check Balance Function:
 def checkBalance(account):
+    clearScreen()
     for acc in readFile():
         if acc["Account Number"] == account["Account Number"]:
-            print(f"\n Your account balance is: ₦{acc['Balance']:,}\n")
+            print(f"Your account balance is: ₦{acc['Balance']:,}")
             if acc["Balance"] < 1000:
-                print("Alert!!! Your balance is low.\n")
+                print("Alert!!! Your balance is low.")
+            input("Press Enter to continue...")
             return
 
-
-# Withdraw Function:
 def withdraw(account):
+    clearScreen()
     accounts = readFile()
     for acc in accounts:
         if acc["Account Number"] == account["Account Number"]:
             try:
                 amount = int(input("Enter the amount you want to withdraw: "))
             except:
-                print("Invalid input!!!")
+                print("Invalid input.")
+                input("Press Enter to continue...")
                 return
-            
-            checkInput = pinChecker(acc["pin"])
-            if checkInput == True:
-                if amount > acc["Balance"]:
-                    print("Insufficient Balance")
-                    return
-                elif amount <= 0:
-                        print("Invalid amount")
-                        return
-                else:
-                    acc["Balance"] = acc["Balance"] - amount
-                    print(f"Withdrawal successful, your new balance is ₦{acc['Balance']:,}")
-                    with open("data.json", "w") as dataFile:
-                        json.dump(accounts, dataFile, indent=4)
-                    return
-            else:
-                print("You have entered incorrect pins 3 times, Try again later.")
+            if not pinChecker(acc["pin"]):
+                print("You have entered incorrect pins 3 times.")
+                input("Press Enter to continue...")
                 return
+            if amount > acc["Balance"]:
+                print("Insufficient balance.")
+                input("Press Enter to continue...")
+                return
+            elif amount <= 0:
+                print("Invalid amount.")
+                input("Press Enter to continue...")
+                return
+            acc["Balance"] -= amount
+            print(f"Withdrawal successful. New balance: ₦{acc['Balance']:,}")
+            with open("data.json", "w") as dataFile:
+                json.dump(accounts, dataFile, indent=4)
+            input("Press Enter to continue...")
+            return
 
-
-# Transfer Function:
-def transfer(account):
-    accounts = readFile()
-    for acc in accounts:
-        if acc["Account Number"] == account["Account Number"]:
-            recipientAccount = getRecipientAccount(10, "account")
-            try: 
-                amount = int(input(f"Enter the amount you want to transfer to {recipientAccount}: "))
-            except:
-                print("Invalid input, numbers only!!!")
-                return
-            checkInput = pinChecker(acc["pin"])
-            if checkInput == True:
-                if amount > acc["Balance"]:
-                    print("Insufficient Fund")
-                    return
-                acc["Balance"] = acc["Balance"] - amount
-                with open("data.json", "w") as dataFile:
-                    json.dump(accounts, dataFile, indent=4)
-                print (f"Transfer to ({recipientAccount}) was successful")
-                print(f"Your New balance is ₦{acc['Balance']:,}")
-                return
-            else:
-                print("You have entered incorrect pins 3 times, Try again later.")
-                return
-
-
-# Deposit Function:
 def deposit(account):
+    clearScreen()
     accounts = readFile()
     for acc in accounts:
         if acc["Account Number"] == account["Account Number"]:
             try:
-                depoAmount = int(input("Enter the amount you wish to deposit in figures: "))
+                depoAmount = int(input("Enter the amount you wish to deposit: "))
             except:
-                print("Invalid input!, enter the amount in figures only.")
+                print("Invalid input.")
+                input("Press Enter to continue...")
                 return
             if depoAmount <= 0:
-                print("You cannot deposit ₦0 or a negative  number")
+                print("You cannot deposit ₦0 or a negative number.")
+                input("Press Enter to continue...")
                 return
             elif depoAmount < 100:
-                print("The minimum deposit is ₦100.")
+                print("Minimum deposit is ₦100.")
+                input("Press Enter to continue...")
                 return
-            else:
-                confirm = input(f"Please confirm, you want to deposit ₦{depoAmount}:, Y/N: ")
-                if confirm.upper() != "Y":
-                    print("Deposit cancelled")
-                    return
-                else: 
-                    checkInput = pinChecker(acc["pin"])
-                    if checkInput == True:
-                        acc["Balance"]= acc["Balance"] + depoAmount
-                        print(f"An amount of ₦{depoAmount} has been deposited successfully")
-                        print(f"Your new account balance is {acc['Balance']}")
-                        with open("data.json", "w") as dataFile:
-                            json.dump(accounts, dataFile, indent=4)
-                        return
-                    else:
-                        print("You have entered incorrect pins 3 times, Try again later.")
-                        return
+            confirm = input(f"Confirm deposit of ₦{depoAmount:,}? Y/N: ")
+            if confirm.upper() != "Y":
+                print("Deposit cancelled.")
+                input("Press Enter to continue...")
+                return
+            if not pinChecker(acc["pin"]):
+                print("Incorrect PIN 3 times.")
+                input("Press Enter to continue...")
+                return
+            acc["Balance"] += depoAmount
+            print(f"₦{depoAmount:,} deposited successfully.")
+            print(f"New balance: ₦{acc['Balance']:,}")
+            with open("data.json", "w") as dataFile:
+                json.dump(accounts, dataFile, indent=4)
+            input("Press Enter to continue...")
+            return
 
-
-# Airtime Purchase Function:
-def airtimePurchase(account):
+def transfer(account):
+    clearScreen()
     accounts = readFile()
     for acc in accounts:
         if acc["Account Number"] == account["Account Number"]:
-            recipientNumber = getRecipientAccount(11, "phone")
-            try: 
-                amount = int(input(f"Enter the amount of airtime you want to transfer to {recipientNumber}: "))
+            recipientAccount = getRecipientAccount(10, "account")
+            try:
+                amount = int(input(f"Enter amount to transfer to {recipientAccount}: "))
             except:
-                print("Invalid input, numbers only!!!")
+                print("Invalid input.")
+                input("Press Enter to continue...")
                 return
-            networks = ["glo", "mtn", "airtel", "9mobile", "etisalat"]
-            userInput = input("Enter the network you want to buy (MTN, GLO, Airtel, Etisalat or 9mobile): ")
-
-            if userInput.lower() not in networks:
-                print("Invalid network!!!")
+            if not pinChecker(acc["pin"]):
+                print("Incorrect PIN 3 times.")
+                input("Press Enter to continue...")
                 return
-            
-            checkInput = pinChecker(acc["pin"])
-            if checkInput == True:
-                if amount > acc["Balance"]:
-                    print("Insufficient Fund")
-                    return
-                elif amount <= 0:
-                    print("The amount cannot be negative or  ₦0")
-                    return
-                elif amount > 100000:
-                    print("Amount cannot be greater than  ₦100,000")
-                    return
-                acc["Balance"] = acc["Balance"] - amount
-                with open("data.json", "w") as dataFile:
-                    json.dump(accounts, dataFile, indent=4)
-                print (f"Airtime of  ₦{amount} to ({recipientNumber}) was successful")
-                print(f"Your New balance is ₦{acc['Balance']:,}")
+            if amount > acc["Balance"]:
+                print("Insufficient funds.")
+                input("Press Enter to continue...")
                 return
-            else:
-                print("You have entered incorrect pins 3 times, Try again later.")
-                return
+            acc["Balance"] -= amount
+            print(f"Transfer of ₦{amount:,} to ({recipientAccount}) was successful.")
+            print(f"New balance: ₦{acc['Balance']:,}")
+            with open("data.json", "w") as dataFile:
+                json.dump(accounts, dataFile, indent=4)
+            input("Press Enter to continue...")
+            return
 
-
-
-# Change Pin Function:
-def changePin(account):
+def airtimePurchase(account):
+    clearScreen()
     accounts = readFile()
     for acc in accounts:
         if acc["Account Number"] == account["Account Number"]:
-            checkInput = pinChecker(acc["pin"])
-            if checkInput != True:
-                print("You have entered incorrect pins 3 times, your account has been locked, reach out to our nearest bank to reactivate your account.")
+            recipient = getRecipientAccount(11, "phone")
+            try:
+                amount = int(input(f"Enter amount of airtime to {recipient}: "))
+            except:
+                print("Invalid input.")
+                input("Press Enter to continue...")
+                return
+            network = input("Enter network (MTN, GLO, Airtel, Etisalat, 9mobile): ").lower()
+            if network not in ["mtn", "glo", "airtel", "etisalat", "9mobile"]:
+                print("Invalid network.")
+                input("Press Enter to continue...")
+                return
+            if not pinChecker(acc["pin"]):
+                print("Incorrect PIN 3 times.")
+                input("Press Enter to continue...")
+                return
+            if amount > acc["Balance"]:
+                print("Insufficient funds.")
+                input("Press Enter to continue...")
+                return
+            elif amount <= 0:
+                print("Cannot send ₦0 or negative.")
+                input("Press Enter to continue...")
+                return
+            elif amount > 100000:
+                print("Airtime limit is ₦100,000.")
+                input("Press Enter to continue...")
+                return
+            acc["Balance"] -= amount
+            print(f"Airtime of ₦{amount:,} sent to {recipient}.")
+            print(f"New balance: ₦{acc['Balance']:,}")
+            with open("data.json", "w") as dataFile:
+                json.dump(accounts, dataFile, indent=4)
+            input("Press Enter to continue...")
+            return
+
+def changePin(account):
+    clearScreen()
+    accounts = readFile()
+    for acc in accounts:
+        if acc["Account Number"] == account["Account Number"]:
+            if not pinChecker(acc["pin"]):
+                print("Incorrect PIN 3 times. Account locked.")
                 acc["Locked"] = True
                 with open("data.json", "w") as dataFile:
                     json.dump(accounts, dataFile, indent=4)
+                input("Press Enter to continue...")
                 return
-            else:
-                try:
-                    newPin = getpass.getpass("Enter your new pin: ")
-                    confirmPin = getpass.getpass("Re-enter the new pin for confirmation: ")
-                except:
-                    print("Digits only!!!")
-                if newPin != confirmPin:
-                    print("The pin you entered does not match, please try again later.")
-                    return
-                else: 
-                    acc["pin"] = newPin
-                    with open("data.json", "w") as dataFile:
-                        json.dump(accounts, dataFile, indent=4)
-                    print("You have successfully changed your pin")
-                    return
+            try:
+                newPin = int(getpass.getpass("Enter new pin: "))
+                confirmPin = int(getpass.getpass("Confirm new pin: "))
+            except:
+                print("Digits only.")
+                input("Press Enter to continue...")
+                return
+            if newPin != confirmPin:
+                print("Pins do not match.")
+                input("Press Enter to continue...")
+                return
+            acc["pin"] = newPin
+            print("Pin changed successfully.")
+            with open("data.json", "w") as dataFile:
+                json.dump(accounts, dataFile, indent=4)
+            input("Press Enter to continue...")
+            return
 
-
-# Delete Account Function:
 def deleteAccount(account):
+    clearScreen()
     accounts = readFile()
     for acc in accounts:
         if acc["Account Number"] == account["Account Number"]:
-            confirmAction = input("ARe you sure you want to delete your account, this action is not reversible, Y/N: ")
-            if confirmAction.lower() != "y":
-                print("Action deletion failed")
+            confirm = input("Are you sure you want to delete this account? Y/N: ")
+            if confirm.lower() != "y":
+                print("Deletion cancelled.")
+                input("Press Enter to continue...")
                 return
-            else:
-                checkInput = pinChecker(acc["pin"])
-                if checkInput != True:
-                    print("You have entered incorrect pins 3 times, your account has been locked, reach out to our nearest bank to reactivate your account.")
-                    acc["Locked"] = True
-                    with open("data.json", "w") as dataFile:
-                        json.dump(accounts, dataFile, indent=4)
-                    return
-                else: 
-                    accounts.remove(acc)
-                    with open("data.json", "w") as dataFile:
-                        json.dump(accounts, dataFile, indent=4)
-                    print("Your account has been permanently deleted. We're sorry to see you go.")
-                    return
-
-
-# Account Manger Function:
-def accountManager(account):
-    active = True
-    while active is True:
-        print(f"Welcome, {account["Fullname"]}")
-        userChoice = input("""
-    How may we assist you today: 
-            1 = Check balance
-            2 = withdrawal
-            3 = Transfer
-            4 = Deposit
-            5 = Airtime purchase 
-            6 = Change Pin
-            7 = Open a new account
-            8 = Delete Account
-            9 = Log out 
-    """)
-        if userChoice == "1":
-            checkBalance(account)
-        elif userChoice == "2":
-            withdraw(account)
-        elif userChoice == "3":
-            transfer(account)
-        elif userChoice == "4":
-            deposit(account)
-        elif userChoice == "5":
-            airtimePurchase(account)
-        elif userChoice == "6":
-            changePin(account)
-        elif userChoice == "7":
-            createNewAccount()
-        elif userChoice == "8":
-            deleteAccount(account)
-        elif userChoice == "9":
-            active = False
-        else:
-            print("Your input is invalid, please try again")
-    return
-
-
-# Account Log In Function:
-def accountLogIn():
-    userAccount = input("Enter your account number: ")
-    try:
-        with open("data.json", "r") as datafile:
-            accounts = json.load(datafile)
-    except FileNotFoundError:
-        accounts= []
-    
-    for account in accounts:
-        if userAccount == account["Account Number"]:
-            if account["Locked"] != False:
-                print("Your account has been blocked, please reach out to our nearest branch to reactivate your account.")
-                return
-            print("Welcome " + account["Fullname"])
-            checkInput = pinChecker(account["pin"])
-            if checkInput == True:
-                accountManager(account)
-                return
-            elif checkInput == False:
-                print("You have entered incorrect pins 3 times, your account has been locked, reach out to our nearest bank to reactivate your account.")
-                account["Locked"] = True
+            if not pinChecker(acc["pin"]):
+                print("Incorrect PIN 3 times. Account locked.")
+                acc["Locked"] = True
                 with open("data.json", "w") as dataFile:
                     json.dump(accounts, dataFile, indent=4)
+                input("Press Enter to continue...")
                 return
-    print("The account number you enter does not exist")
-    userInput = input("Do you want to create a new account, Y/N")
-    if userInput.upper()== "Y":
+            accounts.remove(acc)
+            with open("data.json", "w") as dataFile:
+                json.dump(accounts, dataFile, indent=4)
+            print("Account deleted successfully.")
+            input("Press Enter to continue...")
+            return
+
+def accountManager(account):
+    while True:
+        clearScreen()
+        print(f"Welcome, {account['Fullname']}")
+        print("""
+1 = Check balance
+2 = Withdrawal
+3 = Transfer
+4 = Deposit
+5 = Airtime purchase
+6 = Change Pin
+7 = Open new account
+8 = Delete account
+9 = Log out
+        """)
+        choice = input("Choose an option: ")
+        if choice == "1":
+            checkBalance(account)
+        elif choice == "2":
+            withdraw(account)
+        elif choice == "3":
+            transfer(account)
+        elif choice == "4":
+            deposit(account)
+        elif choice == "5":
+            airtimePurchase(account)
+        elif choice == "6":
+            changePin(account)
+        elif choice == "7":
+            createNewAccount()
+        elif choice == "8":
+            deleteAccount(account)
+        elif choice == "9":
+            break
+        input("\nPress Enter to continue...")
+
+def accountLogIn():
+    clearScreen()
+    userAccount = input("Enter your account number: ")
+    accounts = readFile()
+    for acc in accounts:
+        if acc["Account Number"] == userAccount:
+            if acc["Locked"]:
+                print("Your account is locked. Visit branch.")
+                input("Press Enter to continue...")
+                return
+            print("Welcome " + acc["Fullname"])
+            if pinChecker(acc["pin"]):
+                accountManager(acc)
+                return
+            else:
+                print("Incorrect PIN 3 times. Account locked.")
+                acc["Locked"] = True
+                with open("data.json", "w") as dataFile:
+                    json.dump(accounts, dataFile, indent=4)
+                input("Press Enter to continue...")
+                return
+    print("Account not found.")
+    if input("Create new account? Y/N: ").upper() == "Y":
         createNewAccount()
     else:
-        print("Have a nice day!!!")
-        return
+        print("Goodbye.")
+        input("Press Enter to continue...")
