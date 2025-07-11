@@ -41,7 +41,7 @@ def getRecipientAccount(length, action):
 
 def createNewAccount():
     clearScreen()
-    fullName = input("Enter your full name (First Last Surname): ")
+    fullName = input("Enter your full name (First, Last, Surname): ")
     try:
         pin = getpass.getpass("Enter your pin: ")
         confirmPin = getpass.getpass("Re-enter your pin: ")
@@ -91,7 +91,6 @@ def checkBalance(account):
             print(f"Your account balance is: ₦{acc['Balance']:,}")
             if acc["Balance"] < 1000:
                 print("Alert!!! Your balance is low.")
-            input("Press Enter to continue...")
             return
 
 def withdraw(account):
@@ -103,25 +102,20 @@ def withdraw(account):
                 amount = int(input("Enter the amount you want to withdraw: "))
             except:
                 print("Invalid input.")
-                input("Press Enter to continue...")
                 return
             if not pinChecker(acc["pin"]):
                 print("You have entered incorrect pins 3 times.")
-                input("Press Enter to continue...")
                 return
             if amount > acc["Balance"]:
                 print("Insufficient balance.")
-                input("Press Enter to continue...")
                 return
             elif amount <= 0:
                 print("Invalid amount.")
-                input("Press Enter to continue...")
                 return
             acc["Balance"] -= amount
             print(f"Withdrawal successful. New balance: ₦{acc['Balance']:,}")
             with open("data.json", "w") as dataFile:
                 json.dump(accounts, dataFile, indent=4)
-            input("Press Enter to continue...")
             return
 
 def deposit(account):
@@ -133,31 +127,25 @@ def deposit(account):
                 depoAmount = int(input("Enter the amount you wish to deposit: "))
             except:
                 print("Invalid input.")
-                input("Press Enter to continue...")
                 return
             if depoAmount <= 0:
                 print("You cannot deposit ₦0 or a negative number.")
-                input("Press Enter to continue...")
                 return
             elif depoAmount < 100:
                 print("Minimum deposit is ₦100.")
-                input("Press Enter to continue...")
                 return
             confirm = input(f"Confirm deposit of ₦{depoAmount:,}? Y/N: ")
             if confirm.upper() != "Y":
                 print("Deposit cancelled.")
-                input("Press Enter to continue...")
                 return
             if not pinChecker(acc["pin"]):
                 print("Incorrect PIN 3 times.")
-                input("Press Enter to continue...")
                 return
             acc["Balance"] += depoAmount
             print(f"₦{depoAmount:,} deposited successfully.")
             print(f"New balance: ₦{acc['Balance']:,}")
             with open("data.json", "w") as dataFile:
                 json.dump(accounts, dataFile, indent=4)
-            input("Press Enter to continue...")
             return
 
 def transfer(account):
@@ -170,22 +158,18 @@ def transfer(account):
                 amount = int(input(f"Enter amount to transfer to {recipientAccount}: "))
             except:
                 print("Invalid input.")
-                input("Press Enter to continue...")
                 return
             if not pinChecker(acc["pin"]):
                 print("Incorrect PIN 3 times.")
-                input("Press Enter to continue...")
                 return
             if amount > acc["Balance"]:
                 print("Insufficient funds.")
-                input("Press Enter to continue...")
                 return
             acc["Balance"] -= amount
             print(f"Transfer of ₦{amount:,} to ({recipientAccount}) was successful.")
             print(f"New balance: ₦{acc['Balance']:,}")
             with open("data.json", "w") as dataFile:
                 json.dump(accounts, dataFile, indent=4)
-            input("Press Enter to continue...")
             return
 
 def airtimePurchase(account):
@@ -198,35 +182,28 @@ def airtimePurchase(account):
                 amount = int(input(f"Enter amount of airtime to {recipient}: "))
             except:
                 print("Invalid input.")
-                input("Press Enter to continue...")
                 return
             network = input("Enter network (MTN, GLO, Airtel, Etisalat, 9mobile): ").lower()
             if network not in ["mtn", "glo", "airtel", "etisalat", "9mobile"]:
                 print("Invalid network.")
-                input("Press Enter to continue...")
                 return
             if not pinChecker(acc["pin"]):
                 print("Incorrect PIN 3 times.")
-                input("Press Enter to continue...")
                 return
             if amount > acc["Balance"]:
                 print("Insufficient funds.")
-                input("Press Enter to continue...")
                 return
             elif amount <= 0:
                 print("Cannot send ₦0 or negative.")
-                input("Press Enter to continue...")
                 return
             elif amount > 100000:
                 print("Airtime limit is ₦100,000.")
-                input("Press Enter to continue...")
                 return
             acc["Balance"] -= amount
             print(f"Airtime of ₦{amount:,} sent to {recipient}.")
             print(f"New balance: ₦{acc['Balance']:,}")
             with open("data.json", "w") as dataFile:
                 json.dump(accounts, dataFile, indent=4)
-            input("Press Enter to continue...")
             return
 
 def changePin(account):
@@ -239,24 +216,20 @@ def changePin(account):
                 acc["Locked"] = True
                 with open("data.json", "w") as dataFile:
                     json.dump(accounts, dataFile, indent=4)
-                input("Press Enter to continue...")
                 return
             try:
                 newPin = int(getpass.getpass("Enter new pin: "))
                 confirmPin = int(getpass.getpass("Confirm new pin: "))
             except:
                 print("Digits only.")
-                input("Press Enter to continue...")
                 return
             if newPin != confirmPin:
                 print("Pins do not match.")
-                input("Press Enter to continue...")
                 return
             acc["pin"] = newPin
             print("Pin changed successfully.")
             with open("data.json", "w") as dataFile:
                 json.dump(accounts, dataFile, indent=4)
-            input("Press Enter to continue...")
             return
 
 def deleteAccount(account):
@@ -267,27 +240,25 @@ def deleteAccount(account):
             confirm = input("Are you sure you want to delete this account? Y/N: ")
             if confirm.lower() != "y":
                 print("Deletion cancelled.")
-                input("Press Enter to continue...")
                 return
             if not pinChecker(acc["pin"]):
                 print("Incorrect PIN 3 times. Account locked.")
                 acc["Locked"] = True
                 with open("data.json", "w") as dataFile:
                     json.dump(accounts, dataFile, indent=4)
-                input("Press Enter to continue...")
                 return
             accounts.remove(acc)
             with open("data.json", "w") as dataFile:
                 json.dump(accounts, dataFile, indent=4)
             print("Account deleted successfully.")
-            input("Press Enter to continue...")
             return
 
 def accountManager(account):
     while True:
         clearScreen()
-        print(f"Welcome, {account['Fullname']}")
-        print("""
+        # print(f"Welcome, {account['Fullname']}")
+        print(f"""
+Welcome, {account['Fullname']}. What can we help you with:
 1 = Check balance
 2 = Withdrawal
 3 = Transfer
