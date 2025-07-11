@@ -3,9 +3,11 @@ import random
 import json
 import os
 
+# Clear Terminal Function:
 def clearScreen():
     os.system("cls" if os.name == "nt" else "clear")
 
+# Pin Checker Function:
 def pinChecker(original):
     attempt = 0 
     while attempt < 3:
@@ -18,6 +20,8 @@ def pinChecker(original):
             print(f"You have {attemptLeft} more trials!!!")
     return False
 
+
+# Read file Function:
 def readFile():
     try:
         with open("data.json", "r") as dataFile:
@@ -26,6 +30,8 @@ def readFile():
         accounts = []
     return accounts
 
+
+# Get Recipient Account or Phone Number Function:
 def getRecipientAccount(length, action):
     while True:
         recipient = input(f"Enter recipient {action} number, ({length}) digits: ")
@@ -39,6 +45,8 @@ def getRecipientAccount(length, action):
         if confirm.upper() == "Y":
             return recipient
 
+
+# Create a New Account Function:
 def createNewAccount():
     clearScreen()
     fullName = input("Enter your full name (First, Last, Surname): ")
@@ -84,6 +92,8 @@ def createNewAccount():
     print(f"Your account number is {accountNumber}")
     input("Press Enter to continue...")
 
+
+# Check Balance Function:
 def checkBalance(account):
     clearScreen()
     for acc in readFile():
@@ -93,6 +103,8 @@ def checkBalance(account):
                 print("Alert!!! Your balance is low.")
             return
 
+
+# Withdraw Function:
 def withdraw(account):
     clearScreen()
     accounts = readFile()
@@ -118,6 +130,8 @@ def withdraw(account):
                 json.dump(accounts, dataFile, indent=4)
             return
 
+
+# Deposit Function:
 def deposit(account):
     clearScreen()
     accounts = readFile()
@@ -148,6 +162,8 @@ def deposit(account):
                 json.dump(accounts, dataFile, indent=4)
             return
 
+
+# Transfer Function:
 def transfer(account):
     clearScreen()
     accounts = readFile()
@@ -172,6 +188,8 @@ def transfer(account):
                 json.dump(accounts, dataFile, indent=4)
             return
 
+
+# Airtime Purchase Function:
 def airtimePurchase(account):
     clearScreen()
     accounts = readFile()
@@ -206,6 +224,8 @@ def airtimePurchase(account):
                 json.dump(accounts, dataFile, indent=4)
             return
 
+
+# Change Pin Function:
 def changePin(account):
     clearScreen()
     accounts = readFile()
@@ -232,6 +252,8 @@ def changePin(account):
                 json.dump(accounts, dataFile, indent=4)
             return
 
+
+# Delete Account Function:
 def deleteAccount(account):
     clearScreen()
     accounts = readFile()
@@ -253,6 +275,8 @@ def deleteAccount(account):
             print("Account deleted successfully.")
             return
 
+
+# Account Manager Function:
 def accountManager(account):
     while True:
         clearScreen()
@@ -290,6 +314,8 @@ Welcome, {account['Fullname']}. What can we help you with:
             break
         input("\nPress Enter to continue...")
 
+
+# Account Login Function
 def accountLogIn():
     clearScreen()
     userAccount = input("Enter your account number: ")

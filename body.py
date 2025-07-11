@@ -1,6 +1,5 @@
 import functions
 sessionActive = True 
-
 while sessionActive == True :
     print ("Welcome to CLI Bank.")
     print("""
