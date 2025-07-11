@@ -32,16 +32,6 @@ Welcome to the CLI Bank App – a command-line banking system built with pure Py
 - Confirms amount and user PIN before processing
 - Saves updated balance to the data file
 
----
-
-## 🔄 Data Storage
-- All account data is stored in a local `data.json` file
-- Data includes: Fullname, PIN, Account Number, Balance, Account Type, Locked status
-
----
-
-## 🧠 What You’ll See Next (Coming Soon)
-
 ### 📥 Deposit Function  
 Allow users to fund their account manually from CLI.
 
@@ -53,6 +43,16 @@ Let users change their PIN securely after PIN confirmation.
 
 ### 🧨 Delete Account  
 Give users the option to permanently delete their bank account.
+
+---
+
+## 🔄 Data Storage
+- All account data is stored in a local `data.json` file
+- Data includes: Fullname, PIN, Account Number, Balance, Account Type, Locked status
+
+---
+
+## 🧠 What You’ll See Next (Coming Soon)
 
 ### 🧾 Transaction History (Mini Statement)  
 Save and show the last few actions (withdrawals, transfers, etc.)

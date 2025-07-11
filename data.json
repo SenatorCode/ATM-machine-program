@@ -14,5 +14,13 @@
         "Balance": 29000,
         "Locked": false,
         "Account Number": "1243312610"
+    },
+    {
+        "Fullname": "Luqman Ajanni Ahmad",
+        "pin": "1234",
+        "Account Type": "Savings",
+        "Balance": 277347437,
+        "Locked": false,
+        "Account Number": "6082259178"
     }
 ]
